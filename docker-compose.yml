@@ -1,0 +1,72 @@
+version: "3.7"
+
+services:
+  app:
+    restart: always
+    image: golang:latest
+    container_name: storage-golang
+    depends_on:
+      - nginx
+    ports:
+      - 10002:10002
+      
+  # можно увеличить до 16, но я оставил что бы сохранить класстеризацию
+  minio1:
+    image: minio/minio:RELEASE.2021-04-06T23-11-00Z
+    container_name: storage-minio1
+    volumes:
+      # можно разделить на две физические диски, что бы обеспечить отказо устойчивости
+      - ./data1-1:/data1
+      - ./data1-2:/data2
+    expose:
+      - 127.2.4.2:9001:9000
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    # синтаксис для указание множество серверов результат: http://minio1/data1, http://minio2/data2
+    command: server http://minio{1...2}/data{1...2}
+    healthcheck:
+      # не помешает хелзчек :)
+      test: ["CMD", "curl", "-f", "http://127.2.4.2:9001/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  minio2:
+    image: minio/minio:RELEASE.2021-04-06T23-11-00Z
+    container_name: storage-minio2
+    volumes:
+      # можно разделить на две физические диски, что бы обеспечить отказо устойчивости
+      - ./data2-1:/data1
+      - ./data2-2:/data2
+    expose:
+      - 127.2.4.2:9001:9000
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    # синтаксис для указание множество серверов результат: http://minio1/data1, http://minio2/data2
+    command: server http://minio{1...2}/data{1...2}
+    healthcheck:
+      # не помешает хелзчек :)
+      test: [ "CMD", "curl", "-f", "http://127.2.4.2:9001/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  #nginx нужен для балансировки запросов между minio сервисов
+  nginx:
+    image: nginx:1.19.2-alpine
+    container_name: storage-nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "9000:9000"
+    depends_on:
+      - minio1
+      - minio2
+  
+volumes:
+  data1-1:
+  data1-2:
+  data2-1:
+  data2-2:

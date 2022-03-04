@@ -1,0 +1,7 @@
+time="2022-02-27T20:32:58+05:00" level=info msg="logger initialized" func="app.go:21" file="main.main()"
+time="2022-02-27T20:32:58+05:00" level=info msg="config initializing" func="app.go:23" file="main.main()"
+time="2022-02-27T20:36:41+05:00" level=info msg="logger initialized" func="app.go:21" file="main.main()"
+time="2022-02-27T20:36:41+05:00" level=info msg="config initializing" func="app.go:23" file="main.main()"
+time="2022-02-27T20:36:41+05:00" level=error msg="Config File \"config\" Not Found in \"[]\"" func="app.go:26" file="main.main()"
+time="2022-02-27T20:38:34+05:00" level=info msg="logger initialized" func="app.go:21" file="main.main()"
+time="2022-02-27T20:38:34+05:00" level=info msg="config initializing" func="app.go:23" file="main.main()"
